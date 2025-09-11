@@ -279,12 +279,18 @@ activate-venv: check-uv
 all-chimera:
 	@echo "$(YELLOW)Using Chimera configuration...$(NC)"
 	@echo "INFRA=CHIMERA" > .config.mk
+	@echo "VENV_NAME=$(HOME)/envs/bionemo-venv-fa281" >> .config.mk
+
+	git submodule update --init --recursive
 	$(MAKE) all
 
 .PHONY: all-lambda
 all-lambda:
 	@echo "$(YELLOW)Using Lambda configuration...$(NC)"
 	@echo "INFRA=LAMBDA" > .config.mk
+	@echo "VENV_NAME=$(HOME)/envs/bionemo-venv-fa281" >> .config.mk
+
+	git submodule update --init --recursive
 	$(MAKE) all
 
 
@@ -363,6 +369,12 @@ install-hyena: activate-venv
 	@echo "$(YELLOW)Installing causal-conv1d from tested fork...$(NC)"
 	@$(install_causal_conv1d)
 	@echo "$(GREEN) Hyena dependencies installed successfully$(NC)"
+
+.PHONY: check-critical-deps
+check-critical-deps: activate-venv
+	@echo "$(YELLOW)Checking critical dependencies versions...$(NC)"
+	@$(check_critical_deps)
+	@echo "$(GREEN) Critical dependencies versions checked successfully$(NC)"
 
 .PHONY: install-critical-deps
 install-critical-deps: activate-venv
