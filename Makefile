@@ -108,7 +108,7 @@ define activate_venv
 endef
 
 define install_pytorch
-	@. $(VENV_NAME)/bin/activate && \
+	. $(VENV_NAME)/bin/activate && \
 	$(UV) pip install torch==$(TORCH_VERSION)+$(CUDA_VERSION) \
 					torchvision==$(TORCHVISION_VERSION)+$(CUDA_VERSION) \
 					torchaudio==$(TORCH_VERSION)+$(CUDA_VERSION) \
@@ -196,7 +196,7 @@ define check_critical_deps
 	
 	@echo "$(YELLOW)Checking mamba-ssm version...$(NC)"
 	@INSTALLED_MAMBA_SSM_VERSION="$$(. $(VENV_NAME)/bin/activate && python -c 'import mamba_ssm; print(\"installed\")' 2>/dev/null || echo 'not_installed')"; \
-	if [ "$$INSTALLED_MAMBA_SSM_VERSION" == "not_installed" ]; then \
+	if [ "$$INSTALLED_MAMBA_SSM_VERSION"   = "not_installed" ]; then \
 		echo "$(YELLOW)Mamba SSM not installed. Installing...$(NC)"; \
 		$(install_mamba_ssm); \
 	elif [ "$$INSTALLED_MAMBA_SSM_VERSION" != "$$MAMBA_SSM_VERSION" ]; then \
@@ -278,8 +278,10 @@ activate-venv: check-uv
 .PHONY: all-chimera
 all-chimera:
 	@echo "$(YELLOW)Using Chimera configuration...$(NC)"
-	@echo "INFRA=CHIMERA" > .config.mk
-	@echo "VENV_NAME=$(HOME)/envs/bionemo-venv-fa281" >> .config.mk
+	if [ ! -f ".config.mk" ]; then \
+		echo "INFRA=CHIMERA" > .config.mk; \
+		echo "VENV_NAME=$(HOME)/envs/bionemo-venv-fa281" >> .config.mk; \
+	fi
 
 	git submodule update --init --recursive
 	$(MAKE) all
@@ -287,8 +289,10 @@ all-chimera:
 .PHONY: all-lambda
 all-lambda:
 	@echo "$(YELLOW)Using Lambda configuration...$(NC)"
-	@echo "INFRA=LAMBDA" > .config.mk
-	@echo "VENV_NAME=$(HOME)/envs/bionemo-venv-fa281" >> .config.mk
+	if [ ! -f ".config.mk" ]; then \
+		echo "INFRA=LAMBDA" > .config.mk; \
+		echo "VENV_NAME=$(HOME)/envs/bionemo-venv-fa281" >> .config.mk; \
+	fi
 
 	git submodule update --init --recursive
 	$(MAKE) all
@@ -373,13 +377,13 @@ install-hyena: activate-venv
 .PHONY: check-critical-deps
 check-critical-deps: activate-venv
 	@echo "$(YELLOW)Checking critical dependencies versions...$(NC)"
-	@$(check_critical_deps)
+	$(check_critical_deps)
 	@echo "$(GREEN) Critical dependencies versions checked successfully$(NC)"
 
 .PHONY: install-critical-deps
 install-critical-deps: activate-venv
 	@echo "$(YELLOW)Installing critical dependencies...$(NC)"
-	@$(check_critical_deps)
+	$(check_critical_deps)
 	@echo "$(GREEN) Critical dependencies installed successfully$(NC)"
 
 # Test the installation
